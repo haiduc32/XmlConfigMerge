@@ -1,0 +1,5 @@
+I:\backup_07.05.2011\Projects\XmlConfigMerge\XmlConfigMergeConsole\obj\x86\Debug\ResolveAssemblyReference.cache
+I:\backup_07.05.2011\Projects\XmlConfigMerge\XmlConfigMergeConsole\bin\Debug\XmlConfigMerge.exe
+I:\backup_07.05.2011\Projects\XmlConfigMerge\XmlConfigMergeConsole\bin\Debug\XmlConfigMerge.pdb
+I:\backup_07.05.2011\Projects\XmlConfigMerge\XmlConfigMergeConsole\obj\x86\Debug\XmlConfigMerge.exe
+I:\backup_07.05.2011\Projects\XmlConfigMerge\XmlConfigMergeConsole\obj\x86\Debug\XmlConfigMerge.pdb
