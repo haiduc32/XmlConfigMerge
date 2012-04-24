@@ -200,9 +200,7 @@ namespace Tools.XmlConfigMergeConsole
 
 		private static bool IsFlag(string arg)
 		{
-			AllFlags.Any(x => arg.StartsWith(x, StringComparison.OrdinalIgnoreCase));
-
-			return false;
+			return AllFlags.Any(x => arg.StartsWith(x, StringComparison.OrdinalIgnoreCase));
 		}
 
 		private static void LogToConsole(string[] lines)
