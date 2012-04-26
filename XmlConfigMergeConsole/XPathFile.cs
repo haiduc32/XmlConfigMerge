@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,21 +27,37 @@ namespace Tools.XmlConfigMergeConsole
 				//skip comments
 				if (line.TrimStart().StartsWith("--")) continue;
 
-				string[] split = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                string trimmedLine = line.Trim();
+
+                //check that the line has any chars
+                if (string.IsNullOrEmpty(trimmedLine)) continue;
+
+                List<string> splitParameters = null;
+
+                if (trimmedLine[0] == '"')
+                {
+                    string[] split = trimmedLine.Split('"');
+                    splitParameters = split.Where(x => !string.IsNullOrEmpty(x.Trim())).ToList();
+                }
+                else
+                {
+                    string[] split = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    splitParameters = split.ToList();
+                }
 
 				//check that we have enough data on the line
-				if (split.Count() < 2)
+                if (splitParameters.Count() < 2)
 				{
 					throw new ApplicationException(
 						string.Format("Found a line in file with only one parameter. Line {0}", lineNumber));
 				}
 
-				string xPath = split[0];
-				string replaceWith = split[1];
+                string xPath = splitParameters[0];
+                string replaceWith = splitParameters[1];
 
 				//if we have at least 3 separate values, than it is the regex pattern
 				Regex replacePattern = null;
-				if (split.Count() > 2) replacePattern = new Regex(split[2], RegexOptions.IgnoreCase);
+                if (splitParameters.Count() > 2) replacePattern = new Regex(splitParameters[2], RegexOptions.IgnoreCase);
 
 				result.Add(new XPathRegexReplacement(xPath, replaceWith, replacePattern));
 			}
