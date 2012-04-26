@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -172,7 +172,16 @@ namespace Tools.XmlConfigMergeConsole
 				//Process each specified XPathRegexReplacement
 				foreach (XPathRegexReplacement repl in xPathRegexReplacements)
 				{
-					string[] newValues = config.ReplaceXPathValues(repl.XPath, repl.ReplaceWith, repl.ReplacePattern);
+					string[] newValues = null;
+					try
+					{
+						newValues = config.ReplaceXPathValues(repl.XPath, repl.ReplaceWith, repl.ReplacePattern);
+					}
+					catch (Exception ex)
+					{
+						Exception newEx = new Exception(string.Format("XPath {0} failed with message: {1}",
+							repl.XPath, ex.Message), ex);
+					}
 					if (newValues != null) LogToConsole(newValues);
 				}
 
@@ -191,12 +200,11 @@ namespace Tools.XmlConfigMergeConsole
 			catch (Exception ex)
 			{
 				Console.ForegroundColor = ConsoleColor.Red;
-				Console.WriteLine("**ERROR: " + ex.Message);
+				Console.WriteLine("**ERROR: " + ex);
 				Console.ResetColor();
 				return 1; //error
 			}
 		}
-
 
 		private static bool IsFlag(string arg)
 		{
@@ -205,10 +213,18 @@ namespace Tools.XmlConfigMergeConsole
 
 		private static void LogToConsole(string[] lines)
 		{
+			Console.ForegroundColor = ConsoleColor.Gray;
 			foreach (string line in lines)
 			{
-				Console.WriteLine(line);
+				string outputLine = line;
+				for (int i = 0; i < outputLine.Count(); i += Console.WindowWidth)
+				{
+					outputLine = outputLine.Insert(i, "    ");
+				}
+
+				Console.WriteLine(outputLine);
 			}
+			Console.ResetColor();
 		}
 	}
 }
