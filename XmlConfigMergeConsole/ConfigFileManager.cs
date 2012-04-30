@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Xml;
 using System.IO;
 using System.Collections;
@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Tools.XmlConfigMerge
 {
@@ -76,7 +78,7 @@ namespace Tools.XmlConfigMerge
 			_optionalCode = optionalCode;
 			if (!string.IsNullOrEmpty(_optionalCode))
 			{
-				_optionalCodeRegex = new Regex(@"^#[a-z0-9_-]+", RegexOptions.IgnoreCase);
+				_optionalCodeRegex = new Regex(@"\G#[a-z0-9_-]+", RegexOptions.IgnoreCase);
 			}
 
 			if (mergeFromConfigPath != null && (!File.Exists(mergeFromConfigPath)) && !makeMergeFromConfigPathTheSavePath)
@@ -158,19 +160,23 @@ namespace Tools.XmlConfigMerge
 			//check that if the xpath starts with an optional code, it matches the current optional code
 			if (!string.IsNullOrEmpty(_optionalCode))
 			{
-				Match match = _optionalCodeRegex.Match(xPath);
-				if (match.Success)
+				bool foundMatch = false;
+				MatchCollection matches = _optionalCodeRegex.Matches(xPath);
+				foreach (Match match in matches)
 				{
-					if (string.Compare(match.Value.TrimStart('#'), _optionalCode) != 0)
+					if (string.Compare(match.Value.TrimStart('#'), _optionalCode) == 0)
 					{
-						return null;
-					}
-					else
-					{
-						//have to remove the optional value from the xPath because it is not a standard construction
-						xPath = xPath.Remove(0, match.Value.Length);
+						//have to remove all optional values from the xPath because it is not a standard construction
+						int matchesLength = matches.OfType<Match>().Sum(x => x.Length);
+						xPath = xPath.Remove(0, matchesLength);
+
+						//we found a match, so we can break the iteration
+						foundMatch = true;
+						break;
 					}
 				}
+
+				if (!foundMatch) return null;
 			}
 
 			ArrayList ret = new ArrayList();
