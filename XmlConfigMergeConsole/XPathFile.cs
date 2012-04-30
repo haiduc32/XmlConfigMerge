@@ -19,6 +19,10 @@ namespace Tools.XmlConfigMergeConsole
 		/// <returns>The list of replacement values.</returns>
 		public static List<XPathRegexReplacement> Load(string filename)
 		{
+			//"[^"]+"|\S+ should split by "param" param "param param"
+			//spaces or ""
+			Regex paramRegex = new Regex("\"[^\"]+\"|\\S+");
+
 			List<XPathRegexReplacement> result = new List<XPathRegexReplacement>();
 			int lineNumber = 0;
 			foreach (string line in File.ReadAllLines(filename))
@@ -27,37 +31,23 @@ namespace Tools.XmlConfigMergeConsole
 				//skip comments
 				if (line.TrimStart().StartsWith("--")) continue;
 
-                string trimmedLine = line.Trim();
-
                 //check that the line has any chars
+                string trimmedLine = line.Trim();
                 if (string.IsNullOrEmpty(trimmedLine)) continue;
 
-                List<string> splitParameters = null;
+				MatchCollection paramMatches = paramRegex.Matches(trimmedLine);
 
-                if (trimmedLine[0] == '"')
-                {
-                    string[] split = trimmedLine.Split('"');
-                    splitParameters = split.Where(x => !string.IsNullOrEmpty(x.Trim())).ToList();
-                }
-                else
-                {
-                    string[] split = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    splitParameters = split.ToList();
-                }
-
-				//check that we have enough data on the line
-                if (splitParameters.Count() < 2)
+				if (paramMatches.Count < 2)
 				{
 					throw new ApplicationException(
-						string.Format("Found a line in file with only one parameter. Line {0}", lineNumber));
+						string.Format("Found a line in file with not enough parameters. Line {0}", lineNumber));
 				}
 
-                string xPath = splitParameters[0];
-                string replaceWith = splitParameters[1];
+				string xPath = paramMatches[0].Value.Trim('"');
+				string replaceWith = paramMatches[1].Value.Trim('"');
 
-				//if we have at least 3 separate values, than it is the regex pattern
 				Regex replacePattern = null;
-                if (splitParameters.Count() > 2) replacePattern = new Regex(splitParameters[2], RegexOptions.IgnoreCase);
+				if (paramMatches.Count > 2) replacePattern = new Regex(paramMatches[2].Value.Trim('"'), RegexOptions.IgnoreCase);
 
 				result.Add(new XPathRegexReplacement(xPath, replaceWith, replacePattern));
 			}
