@@ -12,6 +12,10 @@ namespace Tools.XmlConfigMergeConsole
 	/// </summary>
 	internal static class XPathFile
 	{
+		//"[^"]+"|\S+ should split by "param" param "param param"
+		//spaces or ""
+		private static Regex paramRegex = new Regex("\"[^\"]+\"|\\S+");
+
 		/// <summary>
 		/// Opens a file containing XPath regex replacement values, and returns the loaded list.
 		/// </summary>
@@ -19,10 +23,6 @@ namespace Tools.XmlConfigMergeConsole
 		/// <returns>The list of replacement values.</returns>
 		public static List<XPathRegexReplacement> Load(string filename)
 		{
-			//"[^"]+"|\S+ should split by "param" param "param param"
-			//spaces or ""
-			Regex paramRegex = new Regex("\"[^\"]+\"|\\S+");
-
 			List<XPathRegexReplacement> result = new List<XPathRegexReplacement>();
 			int lineNumber = 0;
 			foreach (string line in File.ReadAllLines(filename))
@@ -35,24 +35,29 @@ namespace Tools.XmlConfigMergeConsole
                 string trimmedLine = line.Trim();
                 if (string.IsNullOrEmpty(trimmedLine)) continue;
 
-				MatchCollection paramMatches = paramRegex.Matches(trimmedLine);
+				List<string> splitParameters = ParseParams(trimmedLine);
 
-				if (paramMatches.Count < 2)
+				if (splitParameters.Count < 2)
 				{
 					throw new ApplicationException(
 						string.Format("Found a line in file with not enough parameters. Line {0}", lineNumber));
 				}
 
-				string xPath = paramMatches[0].Value.Trim('"');
-				string replaceWith = paramMatches[1].Value.Trim('"');
+				string xPath = splitParameters[0];
+				string replaceWith = splitParameters[1];
 
 				Regex replacePattern = null;
-				if (paramMatches.Count > 2) replacePattern = new Regex(paramMatches[2].Value.Trim('"'), RegexOptions.IgnoreCase);
+				if (splitParameters.Count > 2) replacePattern = new Regex(splitParameters[2], RegexOptions.IgnoreCase);
 
 				result.Add(new XPathRegexReplacement(xPath, replaceWith, replacePattern));
 			}
 
 			return result;
+		}
+
+		private static List<string> ParseParams(string paramLine)
+		{
+			return paramRegex.Matches(paramLine).OfType<Match>().Select(x => x.Value.Trim('"', ' ')).ToList();
 		}
 	}
 }
