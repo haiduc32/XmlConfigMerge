@@ -1,5 +1,6 @@
 XmlConfigMerge
 ==============
+A small tool to simplify the update of config files for diferent environments, or bulk update.
 
 Hisotry
 ==============
