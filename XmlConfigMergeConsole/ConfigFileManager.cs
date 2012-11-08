@@ -78,7 +78,7 @@ namespace Tools.XmlConfigMerge
 			_optionalCode = optionalCode;
 			if (!string.IsNullOrEmpty(_optionalCode))
 			{
-				_optionalCodeRegex = new Regex(@"\G#[a-z0-9_-]+", RegexOptions.IgnoreCase);
+				_optionalCodeRegex = new Regex(@"\G#[a-zA-Z0-9_-]+", RegexOptions.IgnoreCase);
 			}
 
 			if (mergeFromConfigPath != null && (!File.Exists(mergeFromConfigPath)) && !makeMergeFromConfigPathTheSavePath)
@@ -162,21 +162,25 @@ namespace Tools.XmlConfigMerge
 			{
 				bool foundMatch = false;
 				MatchCollection matches = _optionalCodeRegex.Matches(xPath);
-				foreach (Match match in matches)
+
+				if (matches.Count > 0)
 				{
-					if (string.Compare(match.Value.TrimStart('#'), _optionalCode) == 0)
+					foreach (Match match in matches)
 					{
-						//have to remove all optional values from the xPath because it is not a standard construction
-						int matchesLength = matches.OfType<Match>().Sum(x => x.Length);
-						xPath = xPath.Remove(0, matchesLength);
+						if (string.Compare(match.Value.TrimStart('#'), _optionalCode) == 0)
+						{
+							//have to remove all optional values from the xPath because it is not a standard construction
+							int matchesLength = matches.OfType<Match>().Sum(x => x.Length);
+							xPath = xPath.Remove(0, matchesLength);
 
-						//we found a match, so we can break the iteration
-						foundMatch = true;
-						break;
+							//we found a match, so we can break the iteration
+							foundMatch = true;
+							break;
+						}
 					}
-				}
 
-				if (!foundMatch) return null;
+					if (!foundMatch) return null;
+				}
 			}
 
 			ArrayList ret = new ArrayList();
