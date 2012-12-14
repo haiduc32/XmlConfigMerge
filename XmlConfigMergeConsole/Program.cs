@@ -73,6 +73,7 @@ namespace Tools.XmlConfigMergeConsole
 
 					switch (arg)
 					{
+					
 						case MergeFromConfigFileFlag:
 							if (mergeFromConfigFile != null)
 							{
@@ -125,6 +126,7 @@ namespace Tools.XmlConfigMergeConsole
 							}
 							xPathRegexReplacements.Add(new XPathRegexReplacement(xPath, replaceWith, replacePattern));
 							break;
+							//the replacement pattern is specified
 						case XPathRegexReplacementFileFlag:
 							i++;
 							if (i >= args.Length)
