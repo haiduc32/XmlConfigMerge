@@ -86,6 +86,7 @@ namespace Tools.XmlConfigMergeConsole
 							mergeFromConfigFile = args[i];
 							i++;
 							break;
+							//option for specifying a custom selector 
 						case OptionalFlag:
 							if (optionalCode != null)
 							{
